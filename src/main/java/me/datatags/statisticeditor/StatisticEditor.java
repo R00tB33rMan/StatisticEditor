@@ -25,6 +25,7 @@ public class StatisticEditor extends JavaPlugin {
 		saveDefaultConfig();
 		StatisticManager.setVanillaNames(getConfig().getBoolean("use vanilla stat names", false));
 		loadMessages();
+        // Command executors are ran at next tick to preserve compatibility with PlugMan/PugManX
 		scheduler.runNextTick(task -> getCommand("statistic").setExecutor(new StatisticCommand()));
 		scheduler.runNextTick(task -> getCommand("runifstat").setExecutor(new RunIfStatCommand()));
 		if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
