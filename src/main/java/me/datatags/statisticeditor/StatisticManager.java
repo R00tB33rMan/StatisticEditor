@@ -10,11 +10,14 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 public class StatisticManager {
+
 	private static boolean isVanillaNames = false;
 	private static BiMap<Statistic,String> vanillaNames = null;
+
 	public static void setVanillaNames(boolean vanillaNames) {
 		isVanillaNames = vanillaNames;
 	}
+
 	public static Statistic getStatistic(String statString) {
 		if (!isVanillaNames) {
 			try {
@@ -23,12 +26,18 @@ public class StatisticManager {
 				return null;
 			}
 		}
+
 		return getVanillaStatistic(statString);
 	}
+
 	private static Statistic getVanillaStatistic(String statString) {
-		if (vanillaNames == null) setupNames();
+		if (vanillaNames == null) {
+            setupNames();
+        }
+
 		return vanillaNames.inverse().get(statString);
 	}
+
 	@SuppressWarnings("unchecked")
 	private static void setupNames() {
 		try {
@@ -43,6 +52,7 @@ public class StatisticManager {
 				statMap.forEach((s,v) -> vanillaNames.put(s, ((String)v).replace("stat.", "")));
 				return;
 			}
+
 			Field[] fields = keyNameClass.getDeclaredFields();
 			Field keyNameField = fields[fields.length - 1];
 			keyNameField.setAccessible(true);
@@ -53,21 +63,32 @@ public class StatisticManager {
 			e.printStackTrace();
 		}
 	}
+
 	public static String getStatisticName(Statistic stat) {
-		if (!isVanillaNames) return stat.name();
+		if (!isVanillaNames) {
+            return stat.name();
+        }
+
 		return getVanillaStatisticName(stat);
 	}
+
 	private static String getVanillaStatisticName(Statistic stat) {
-		if (vanillaNames == null) setupNames();
+		if (vanillaNames == null) {
+            setupNames();
+        }
+
 		return vanillaNames.get(stat);
 	}
+
 	public static Message getStatValue(OfflinePlayer player, Statistic stat, String arg) {
 		return setStatValue(player, stat, arg, null, false);
 	}
+
 	public static Message setStatValue(OfflinePlayer player, Statistic stat, String arg, Integer rawValue, boolean relative) {
 		if (stat == null) {
 			return new Message("invalid-stat").setStat("null");
 		}
+
 		// two birds, one stone by comparing the booleans
 		if ((arg == null) != (stat.getType() == Statistic.Type.UNTYPED)) {
 			if (arg == null) {
@@ -75,17 +96,20 @@ public class StatisticManager {
 			} else {
 				return new Message("stat-extra-argument").setArgument(arg).setStat(stat);
 			}
-		} else if (arg == null && stat.getType() == Statistic.Type.UNTYPED) {
+		} else if (arg == null) {
 			if (rawValue == null) {
 				return new Message("player-stat").setPlayer(player).setStat(stat).setValue(player.getStatistic(stat));
 			}
+
 			int value = rawValue;
 			if (relative) {
 				value += player.getStatistic(stat);
 			}
+
 			if (value < 0) {
 				return new Message("negative-value").setValue(value);
 			}
+
 			player.setStatistic(stat, value);
 			return new Message("stat-set").setPlayer(player).setStat(stat).setValue(value);
 		} else if (stat.getType() == Statistic.Type.ENTITY) {
@@ -97,24 +121,30 @@ public class StatisticManager {
 					if (nonzero && player.getStatistic(stat, entity) == 0) continue;
 					cmsg.add().setPlayer(player).setStat(stat).setArgument(entity).setValue(player.getStatistic(stat, entity));
 				}
+
 				return cmsg;
 			}
+
 			EntityType entity;
 			try {
 				entity = EntityType.valueOf(arg.toUpperCase());
 			} catch (IllegalArgumentException e) {
 				return new Message("invalid-entity").setArgument(arg);
 			}
+
 			if (rawValue == null) {
 				return new Message("player-stat-with-argument").setPlayer(player).setStat(stat).setValue(player.getStatistic(stat, entity)).setArgument(entity);
 			}
+
 			int value = rawValue;
 			if (relative) {
 				value += player.getStatistic(stat, entity);
 			}
+
 			if (value < 0) {
 				return new Message("negative-value").setValue(value);
 			}
+
 			player.setStatistic(stat, entity, value);
 			return new Message("stat-set-with-argument").setPlayer(player).setStat(stat).setValue(value).setArgument(entity);
 		} else {
@@ -128,27 +158,34 @@ public class StatisticManager {
 						cmsg.add().setPlayer(player).setStat(stat).setValue(player.getStatistic(stat, mat)).setArgument(mat);
 					}
 				}
+
 				return cmsg;
 			}
+
 			Material mat = Material.matchMaterial(arg);
 			if (mat == null) {
 				return new Message("invalid-material").setArgument(arg);
 			}
+
 			if (item && !mat.isItem()) {
 				return new Message("not-an-item").setArgument(mat);
 			} else if (!item && !mat.isBlock()) {
 				return new Message("not-a-block").setArgument(mat);
 			}
+
 			if (rawValue == null) {
 				return new Message("player-stat-with-argument").setPlayer(player).setStat(stat).setValue(player.getStatistic(stat, mat)).setArgument(mat);
 			}
+
 			int value = rawValue;
 			if (relative) {
 				value += player.getStatistic(stat, mat);
 			}
+
 			if (value < 0) {
 				return new Message("negative-value").setValue(value);
 			}
+
 			player.setStatistic(stat, mat, value);
 			return new Message("stat-set-with-argument").setPlayer(player).setStat(stat).setValue(value).setArgument(mat);
 		}

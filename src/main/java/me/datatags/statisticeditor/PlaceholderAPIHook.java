@@ -4,37 +4,41 @@ import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.jetbrains.annotations.NotNull;
 
 public class PlaceholderAPIHook extends PlaceholderExpansion {
-	private StatisticEditor se;
-	public PlaceholderAPIHook(StatisticEditor se) {
+
+	private final StatisticEditor se;
+
+	public PlaceholderAPIHook(@NotNull StatisticEditor se) {
 		this.se = se;
-	}
-	@Override
-	public String getAuthor() {
-		return se.getDescription().getAuthors().get(0);
 	}
 
 	@Override
-	public String getIdentifier() {
+	public @NotNull String getAuthor() {
+		return se.getDescription().getAuthors().getFirst();
+	}
+
+	@Override
+	public @NotNull String getIdentifier() {
 		return "stat";
 	}
 
 	@Override
-	public String getVersion() {
+	public @NotNull String getVersion() {
 		return se.getDescription().getVersion();
 	}
-	
+
 	@Override
 	public boolean canRegister() {
 		return true;
 	}
-	
+
 	@Override
 	public boolean persist() {
 	    return true;
 	}
-	
+
 	@Override
 	public String onPlaceholderRequest(Player p, String params) {
 		String[] args = params.split("-");
